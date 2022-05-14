@@ -5,6 +5,7 @@ require('./db/mongoose');
 const User = require('./models/user');
 const Task = require('./models/task');
 const res = require('express/lib/response');
+const { use } = require('express/lib/application');
 
 
 const app = express();
@@ -56,7 +57,7 @@ app.patch('/users/:id', async (req, res) => {
     const isValidOperation = updates.every(update => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
-        res.status(404).send({error: 'Invalid update!'})
+        res.status(404).send({ error: 'Invalid update!' })
     }
 
     const _id = req.params.id;
@@ -73,13 +74,41 @@ app.patch('/users/:id', async (req, res) => {
     }
 })
 
+app.delete('/users/:id', async (req, res) => {
+    try {
+        const user = User.findByIdAndDelete(req.params.id)
+        if (!user) {
+            res.status(404).send()
+        }
+
+        res.send(user)
+
+    } catch (error) {
+        res.status(500).send(error);
+    }
+})
+
+app.delete('/tasks/:id', async (req, res) => {
+    try {
+        const task = Task.findByIdAndDelete(req.params.id)
+        if (!task) {
+            res.status(404).send()
+        }
+
+        res.send(task)
+
+    } catch (error) {
+        res.status(500).send(error);
+    }
+})
+
 app.patch('/tasks/:id', async (req, res) => {
     const updates = Object.keys(req.body);
     const allowedUpdates = ['description', 'completed']
     const isValidOperation = updates.every(update => allowedUpdates.includes(update))
 
     if (!isValidOperation) {
-        res.status(404).send({error: 'Invalid update!'})
+        res.status(404).send({ error: 'Invalid update!' })
     }
 
     const _id = req.params.id;
